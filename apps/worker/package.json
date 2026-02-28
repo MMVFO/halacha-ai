@@ -1,0 +1,19 @@
+{
+  "name": "@halacha-ai/worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "tsx index.ts",
+    "enqueue": "tsx enqueue.ts"
+  },
+  "dependencies": {
+    "bullmq": "^5.25.0",
+    "ioredis": "^5.4.0",
+    "@halacha-ai/db": "workspace:*",
+    "@halacha-ai/lib": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

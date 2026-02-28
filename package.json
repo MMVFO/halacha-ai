@@ -1,0 +1,22 @@
+{
+  "name": "halacha-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "RAG-based halakhic research system",
+  "scripts": {
+    "dev": "pnpm --filter @halacha-ai/web dev",
+    "build": "pnpm --filter @halacha-ai/web build",
+    "worker": "pnpm --filter @halacha-ai/worker start",
+    "db:migrate": "pnpm --filter @halacha-ai/db migrate",
+    "ingest:shulchan-arukh": "pnpm tsx scripts/ingest_shulchan_arukh.ts",
+    "ingest:mishnah-berurah": "pnpm tsx scripts/ingest_mishnah_berurah.ts",
+    "ingest:responsa": "pnpm tsx scripts/ingest_responsa.ts",
+    "ingest:apocrypha": "pnpm tsx scripts/ingest_apocrypha.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
