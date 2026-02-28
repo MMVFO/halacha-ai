@@ -3,9 +3,9 @@
   "configurations": [
     {
       "name": "halacha-ai",
-      "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "pnpm", "next", "dev"],
-      "port": 3000,
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "--port", "3001"],
+      "port": 3001,
       "cwd": "apps/web"
     }
   ]
