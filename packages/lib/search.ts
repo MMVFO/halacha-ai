@@ -3,7 +3,7 @@ import {
   semanticSearch, keywordSearch, getChunksByIds,
   getChunksByParentRef, getRelationsForChunks,
 } from "@halacha-ai/db";
-import { embedQuestion } from "./embeddings.js";
+import { embedQuestion } from "./embeddings";
 
 export interface SearchOptions {
   question: string;

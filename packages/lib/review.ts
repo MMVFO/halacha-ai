@@ -1,6 +1,6 @@
 import type { HalachaAnswer, ReviewStatus } from "@halacha-ai/db";
 import { findSimilarAnswers, updateAnswerReview } from "@halacha-ai/db";
-import { embedQuestion } from "./embeddings.js";
+import { embedQuestion } from "./embeddings";
 
 export async function findSimilarQuestions(
   question: string,

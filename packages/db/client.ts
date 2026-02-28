@@ -4,7 +4,7 @@ import type {
   Corpus, InsertCorpus, HalachaChunk, InsertChunk,
   HalachaAnswer, InsertAnswer, HalachaRelation, UserProfile,
   CorpusTier, ReviewStatus,
-} from "./schema.js";
+} from "./schema";
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 

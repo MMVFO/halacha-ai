@@ -1,5 +1,5 @@
 import type { SearchMode } from "@halacha-ai/db";
-import type { RetrievedSource } from "./search.js";
+import type { RetrievedSource } from "./search";
 
 const PRACTICAL_SYSTEM = `You are a halakhic research assistant. Your role is to help users understand halakhic sources and opinions. You NEVER issue psak halacha (legal rulings).
 
