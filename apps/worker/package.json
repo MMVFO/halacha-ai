@@ -10,7 +10,10 @@
     "ingest:kabbalah": "tsx ingest-sefaria.ts --category Kabbalah",
     "ingest:halakhah": "tsx ingest-sefaria.ts --category Halakhah",
     "ingest:talmud": "tsx ingest-sefaria.ts --category Talmud",
-    "ingest:chasidut": "tsx ingest-sefaria.ts --category Chasidut"
+    "ingest:chasidut": "tsx ingest-sefaria.ts --category Chasidut",
+    "ingest:otzaria": "tsx ingest-otzaria.ts",
+    "ingest:otzaria:dry": "tsx ingest-otzaria.ts --dry-run",
+    "ingest:otzaria:kabbalah": "tsx ingest-otzaria.ts --category קבלה"
   },
   "dependencies": {
     "bullmq": "^5.25.0",
