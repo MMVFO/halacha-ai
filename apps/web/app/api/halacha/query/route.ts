@@ -42,17 +42,31 @@ export async function POST(req: NextRequest) {
     }
 
     // Run hybrid search
-    const searchResult = await search({
-      question,
-      community: userCommunity,
-      corpusTiers,
-      mode,
-    });
+    let searchResult;
+    try {
+      searchResult = await search({
+        question,
+        community: userCommunity,
+        corpusTiers,
+        mode,
+      });
+    } catch (searchErr: unknown) {
+      const msg = searchErr instanceof Error ? searchErr.message : String(searchErr);
+      if (msg.includes("Embedding API error") || msg.includes("placeholder")) {
+        return NextResponse.json({
+          answer: "The embedding API is not configured yet. Set a valid EMBEDDING_API_KEY in .env and restart the server.",
+          sources: [],
+          setup_required: true,
+        });
+      }
+      throw searchErr;
+    }
 
     if (searchResult.sources.length === 0) {
       return NextResponse.json({
-        answer: "No relevant sources were found for this question in the selected corpus tiers. Try broadening your search or adjusting corpus tier settings.",
+        answer: "No relevant sources found. The corpus may not be ingested yet \u2014 run the ingestion scripts to load halakhic texts into the database.",
         sources: [],
+        setup_required: true,
       });
     }
 
@@ -60,23 +74,40 @@ export async function POST(req: NextRequest) {
     const systemPrompt = getSystemPrompt(mode);
     const userPrompt = buildUserPrompt(question, searchResult.sources);
 
-    const llmResponse = await generate([
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ]);
+    let llmResponse;
+    try {
+      llmResponse = await generate([
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ]);
+    } catch (llmErr: unknown) {
+      const msg = llmErr instanceof Error ? llmErr.message : String(llmErr);
+      if (msg.includes("placeholder") || msg.includes("401") || msg.includes("authentication")) {
+        return NextResponse.json({
+          answer: "The LLM API key is not configured. Set ANTHROPIC_API_KEY or OPENAI_API_KEY in .env.",
+          sources: searchResult.sources,
+          setup_required: true,
+        });
+      }
+      throw llmErr;
+    }
 
-    // Log the answer
-    const questionEmbedding = await embedQuestion(question);
-    await insertAnswer({
-      question,
-      question_embedding: questionEmbedding,
-      answer: llmResponse.content,
-      cited_chunk_ids: searchResult.sources.map((s) => s.id),
-      user_id: body.userId,
-      user_community: userCommunity,
-      corpus_tiers_used: corpusTiers,
-      mode,
-    });
+    // Log answer (best-effort)
+    try {
+      const questionEmbedding = await embedQuestion(question);
+      await insertAnswer({
+        question,
+        question_embedding: questionEmbedding,
+        answer: llmResponse.content,
+        cited_chunk_ids: searchResult.sources.map((s) => s.id),
+        user_id: body.userId,
+        user_community: userCommunity,
+        corpus_tiers_used: corpusTiers,
+        mode,
+      });
+    } catch (logErr) {
+      console.warn("Failed to log answer:", logErr);
+    }
 
     return NextResponse.json({
       answer: llmResponse.content,

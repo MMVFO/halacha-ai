@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import pg from "pg";
 
 async function migrate() {
@@ -24,7 +25,7 @@ async function migrate() {
   const { rows: applied } = await client.query(`SELECT name FROM _migrations ORDER BY id`);
   const appliedSet = new Set(applied.map((r) => r.name));
 
-  const migrationsDir = path.join(import.meta.dirname, ".");
+  const migrationsDir = path.dirname(fileURLToPath(import.meta.url));
   const files = fs.readdirSync(migrationsDir)
     .filter((f) => f.endsWith(".sql"))
     .sort();

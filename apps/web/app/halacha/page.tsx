@@ -24,12 +24,47 @@ interface QueryResponse {
   error?: string;
 }
 
-const COMMUNITIES = [
-  { value: "General", label: "All Communities" },
-  { value: "Ashkenazi", label: "Ashkenazi" },
-  { value: "Sephardi", label: "Sephardi" },
-  { value: "Chabad", label: "Chabad" },
-  { value: "Yemenite", label: "Yemenite" },
+const COMMUNITY_GROUPS = [
+  { group: null, items: [{ value: "General", label: "All Communities" }] },
+  { group: "Ashkenazi", items: [
+    { value: "Ashkenazi", label: "Ashkenazi (General)" },
+    { value: "Lithuanian", label: "Lithuanian (Litvish)" },
+    { value: "German", label: "German (Yekke)" },
+    { value: "Polish", label: "Polish" },
+    { value: "Hungarian", label: "Hungarian" },
+  ]},
+  { group: "Chassidic", items: [
+    { value: "Chassidic", label: "Chassidic (General)" },
+    { value: "Chabad", label: "Chabad-Lubavitch" },
+    { value: "Breslov", label: "Breslov" },
+    { value: "Satmar", label: "Satmar" },
+    { value: "Belz", label: "Belz" },
+    { value: "Ger", label: "Ger" },
+    { value: "Vizhnitz", label: "Vizhnitz" },
+  ]},
+  { group: "Sephardi", items: [
+    { value: "Sephardi", label: "Sephardi (General)" },
+    { value: "Syrian", label: "Syrian (Halabi/Shami)" },
+    { value: "Moroccan", label: "Moroccan" },
+    { value: "Iraqi", label: "Iraqi (Bavli)" },
+    { value: "Persian", label: "Persian" },
+    { value: "Turkish", label: "Turkish" },
+    { value: "Tunisian", label: "Tunisian" },
+    { value: "Algerian", label: "Algerian" },
+  ]},
+  { group: "Mizrachi", items: [
+    { value: "Mizrachi", label: "Mizrachi (General)" },
+    { value: "Yemenite", label: "Yemenite (Teimani)" },
+    { value: "Bukharan", label: "Bukharan" },
+    { value: "Indian", label: "Indian (Bene Israel)" },
+    { value: "Kurdish", label: "Kurdish" },
+  ]},
+  { group: "Other", items: [
+    { value: "Jerusalem", label: "Jerusalem Style" },
+    { value: "Ethiopian", label: "Ethiopian (Beta Israel)" },
+    { value: "Italian", label: "Italian (Italki)" },
+    { value: "Romaniote", label: "Romaniote (Greek)" },
+  ]},
 ];
 
 const MODES: { value: SearchMode; label: string; description: string; icon: string }[] = [
@@ -286,9 +321,19 @@ export default function HalachaPage() {
                   className="select-field"
                   style={{ width: "100%" }}
                 >
-                  {COMMUNITIES.map((c) => (
-                    <option key={c.value} value={c.value}>{c.label}</option>
-                  ))}
+                  {COMMUNITY_GROUPS.map((g) =>
+                    g.group ? (
+                      <optgroup key={g.group} label={g.group}>
+                        {g.items.map((c) => (
+                          <option key={c.value} value={c.value}>{c.label}</option>
+                        ))}
+                      </optgroup>
+                    ) : (
+                      g.items.map((c) => (
+                        <option key={c.value} value={c.value}>{c.label}</option>
+                      ))
+                    )
+                  )}
                 </select>
               </div>
 

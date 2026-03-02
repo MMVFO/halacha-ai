@@ -4,7 +4,13 @@
   "private": true,
   "scripts": {
     "start": "tsx index.ts",
-    "enqueue": "tsx enqueue.ts"
+    "enqueue": "tsx enqueue.ts",
+    "ingest": "tsx ingest-sefaria.ts",
+    "ingest:dry": "tsx ingest-sefaria.ts --dry-run",
+    "ingest:kabbalah": "tsx ingest-sefaria.ts --category Kabbalah",
+    "ingest:halakhah": "tsx ingest-sefaria.ts --category Halakhah",
+    "ingest:talmud": "tsx ingest-sefaria.ts --category Talmud",
+    "ingest:chasidut": "tsx ingest-sefaria.ts --category Chasidut"
   },
   "dependencies": {
     "bullmq": "^5.25.0",

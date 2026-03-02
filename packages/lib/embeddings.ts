@@ -1,4 +1,4 @@
-const EMBEDDING_API_URL = process.env.EMBEDDING_API_URL || "https://api-inference.huggingface.co/models/BAAI/bge-m3";
+const EMBEDDING_API_URL = process.env.EMBEDDING_API_URL || "https://router.huggingface.co/models/BAAI/bge-m3";
 const EMBEDDING_API_KEY = process.env.EMBEDDING_API_KEY || "";
 const EMBEDDING_DIM = parseInt(process.env.EMBEDDING_DIM || "1024", 10);
 

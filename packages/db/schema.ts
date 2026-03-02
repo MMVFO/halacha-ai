@@ -1,6 +1,21 @@
 export type CorpusTier = 'canonical' | 'apocrypha' | 'pseudepigrapha' | 'academic' | 'private';
 export type Era = 'Tanna' | 'Amora' | 'Gaon' | 'Rishon' | 'Acharon' | 'Modern' | 'Second Temple';
-export type Community = 'Ashkenazi' | 'Sephardi' | 'Chabad' | 'Yemenite' | 'Ethiopian' | 'General' | 'Qumran';
+export type Community =
+  | 'General'
+  // Ashkenazi
+  | 'Ashkenazi' | 'Lithuanian' | 'German' | 'Polish' | 'Hungarian'
+  // Chassidic
+  | 'Chassidic' | 'Chabad' | 'Breslov' | 'Satmar' | 'Belz' | 'Ger' | 'Vizhnitz'
+  // Sephardi
+  | 'Sephardi' | 'Syrian' | 'Moroccan' | 'Iraqi' | 'Persian' | 'Turkish' | 'Tunisian' | 'Algerian'
+  // Mizrachi
+  | 'Mizrachi' | 'Yemenite' | 'Bukharan' | 'Indian' | 'Kurdish'
+  // Land-of-Israel
+  | 'Jerusalem' | 'Old Yishuv'
+  // Other
+  | 'Ethiopian' | 'Italian' | 'Romaniote'
+  // Historical
+  | 'Qumran' | 'Karaite';
 export type MinhagScope = 'global' | 'regional' | 'local' | 'family' | 'chassidic';
 export type Language = 'he' | 'en' | 'arc';
 export type UserRole = 'learner' | 'advanced' | 'posek' | 'researcher';
