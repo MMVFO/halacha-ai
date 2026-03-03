@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { SearchMode, CorpusTier, Community } from "@halacha-ai/db";
 import { getUserProfile, insertAnswer } from "@halacha-ai/db";
-import { search, getSystemPrompt, buildUserPrompt, generate, embedQuestion, getLLMInfo } from "@halacha-ai/lib";
+import { search, getSystemPrompt, buildUserPrompt, generate, embedQuestion, getLLMInfo, getRecommendedModel } from "@halacha-ai/lib";
 
 interface QueryRequest {
   question: string;
@@ -9,6 +9,20 @@ interface QueryRequest {
   corpusTiers?: CorpusTier[];
   mode?: SearchMode;
   userId?: number;
+}
+
+// Map search modes to task types for intelligent model selection
+function getTaskType(mode: SearchMode): "practical" | "deep_analysis" | "posek_view" | "general" {
+  switch (mode) {
+    case "practical":
+      return "practical"; // Perplexity Sonar - web-grounded practical rulings
+    case "deep":
+      return "deep_analysis"; // Claude Sonnet - deep analytical reasoning
+    case "posek":
+      return "posek_view"; // Claude/Perplexity - authoritative perspective
+    default:
+      return "general";
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -70,42 +84,50 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Generate answer via LLM
+    // Generate answer via intelligent LLM routing
     const systemPrompt = getSystemPrompt(mode);
     const userPrompt = buildUserPrompt(question, searchResult.sources);
+    const taskType = getTaskType(mode);
     const llmInfo = getLLMInfo();
+    const recommendedModel = getRecommendedModel(taskType);
 
     let llmResponse;
     try {
-      llmResponse = await generate([
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ]);
+      llmResponse = await generate(
+        [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        { taskType } // Let the system choose the best model for this task
+      );
     } catch (llmErr: unknown) {
       const msg = llmErr instanceof Error ? llmErr.message : String(llmErr);
       
       // Return sources even when LLM fails (graceful degradation)
-      if (msg.includes("not set") || msg.includes("not configured")) {
+      if (msg.includes("not set") || msg.includes("not configured") || msg.includes("No LLM API key")) {
         return NextResponse.json({
-          answer: `LLM generation failed (${llmInfo.provider} API key not configured). ` +
+          answer: `LLM generation failed (no API keys configured). ` +
                   `The search found ${searchResult.sources.length} relevant sources below. ` +
-                  `To get AI-generated answers, set ${llmInfo.provider.toUpperCase()}_API_KEY in .env, ` +
-                  `or switch to Perplexity (LLM_PROVIDER=perplexity) for cost-effective web-grounded responses.`,
+                  `To get AI-generated answers, configure at least one API key in .env: ` +
+                  `PERPLEXITY_API_KEY (recommended for ${taskType}), OPENAI_API_KEY, or ANTHROPIC_API_KEY. ` +
+                  `The system will automatically select the best model for each task.`,
           sources: searchResult.sources,
           setup_required: true,
           llm_info: llmInfo,
+          recommended_model: recommendedModel,
         });
       }
       
-      if (msg.includes("credit") || msg.includes("balance") || msg.includes("insufficient") || msg.includes("401") || msg.includes("authentication")) {
+      if (msg.includes("credit") || msg.includes("balance") || msg.includes("insufficient") || msg.includes("All LLM providers failed")) {
         return NextResponse.json({
-          answer: `LLM generation failed (insufficient credits or authentication error with ${llmInfo.provider}). ` +
+          answer: `LLM generation failed (${msg.includes("All LLM providers") ? "all configured providers failed" : "insufficient credits"}). ` +
                   `The search found ${searchResult.sources.length} relevant sources below. ` +
-                  `To fix: Add credits to your ${llmInfo.provider} account, or switch providers. ` +
-                  `Recommended: Set LLM_PROVIDER=perplexity and PERPLEXITY_API_KEY in .env for cost-effective operation.`,
+                  `Recommended for ${mode} mode: ${recommendedModel.provider}/${recommendedModel.model}. ` +
+                  `Configure multiple providers for automatic fallback.`,
           sources: searchResult.sources,
           llm_error: true,
           llm_info: llmInfo,
+          recommended_model: recommendedModel,
         });
       }
       
@@ -139,8 +161,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       answer: llmResponse.content,
       sources: searchResult.sources,
-      citations: llmResponse.citations, // Perplexity web citations
-      model: llmResponse.model,
+      citations: llmResponse.citations, // Perplexity web citations (if used)
+      model_used: {
+        provider: llmResponse.provider,
+        model: llmResponse.model,
+        task_type: taskType,
+      },
       usage: llmResponse.usage,
     });
   } catch (err) {
