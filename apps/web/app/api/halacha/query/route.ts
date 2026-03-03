@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { SearchMode, CorpusTier, Community } from "@halacha-ai/db";
 import { getUserProfile, insertAnswer } from "@halacha-ai/db";
-import { search, getSystemPrompt, buildUserPrompt, generate, embedQuestion } from "@halacha-ai/lib";
+import { search, getSystemPrompt, buildUserPrompt, generate, embedQuestion, getLLMInfo } from "@halacha-ai/lib";
 
 interface QueryRequest {
   question: string;
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     if (searchResult.sources.length === 0) {
       return NextResponse.json({
-        answer: "No relevant sources found. The corpus may not be ingested yet \u2014 run the ingestion scripts to load halakhic texts into the database.",
+        answer: "No relevant sources found. The corpus may not be ingested yet — run the ingestion scripts to load halakhic texts into the database.",
         sources: [],
         setup_required: true,
       });
@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
     // Generate answer via LLM
     const systemPrompt = getSystemPrompt(mode);
     const userPrompt = buildUserPrompt(question, searchResult.sources);
+    const llmInfo = getLLMInfo();
 
     let llmResponse;
     try {
@@ -82,14 +83,40 @@ export async function POST(req: NextRequest) {
       ]);
     } catch (llmErr: unknown) {
       const msg = llmErr instanceof Error ? llmErr.message : String(llmErr);
-      if (msg.includes("placeholder") || msg.includes("401") || msg.includes("authentication")) {
+      
+      // Return sources even when LLM fails (graceful degradation)
+      if (msg.includes("not set") || msg.includes("not configured")) {
         return NextResponse.json({
-          answer: "The LLM API key is not configured. Set ANTHROPIC_API_KEY or OPENAI_API_KEY in .env.",
+          answer: `LLM generation failed (${llmInfo.provider} API key not configured). ` +
+                  `The search found ${searchResult.sources.length} relevant sources below. ` +
+                  `To get AI-generated answers, set ${llmInfo.provider.toUpperCase()}_API_KEY in .env, ` +
+                  `or switch to Perplexity (LLM_PROVIDER=perplexity) for cost-effective web-grounded responses.`,
           sources: searchResult.sources,
           setup_required: true,
+          llm_info: llmInfo,
         });
       }
-      throw llmErr;
+      
+      if (msg.includes("credit") || msg.includes("balance") || msg.includes("insufficient") || msg.includes("401") || msg.includes("authentication")) {
+        return NextResponse.json({
+          answer: `LLM generation failed (insufficient credits or authentication error with ${llmInfo.provider}). ` +
+                  `The search found ${searchResult.sources.length} relevant sources below. ` +
+                  `To fix: Add credits to your ${llmInfo.provider} account, or switch providers. ` +
+                  `Recommended: Set LLM_PROVIDER=perplexity and PERPLEXITY_API_KEY in .env for cost-effective operation.`,
+          sources: searchResult.sources,
+          llm_error: true,
+          llm_info: llmInfo,
+        });
+      }
+      
+      // Unknown error - still return sources
+      console.error("LLM generation error:", llmErr);
+      return NextResponse.json({
+        answer: `LLM generation failed: ${msg}. The search found ${searchResult.sources.length} relevant sources below.`,
+        sources: searchResult.sources,
+        llm_error: true,
+        llm_info: llmInfo,
+      });
     }
 
     // Log answer (best-effort)
@@ -112,6 +139,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       answer: llmResponse.content,
       sources: searchResult.sources,
+      citations: llmResponse.citations, // Perplexity web citations
+      model: llmResponse.model,
+      usage: llmResponse.usage,
     });
   } catch (err) {
     console.error("Query error:", err);
