@@ -1,8 +1,41 @@
+# Dependencies
 node_modules/
+
+# Build outputs
 dist/
 .next/
+*.tsbuildinfo
+
+# Turborepo
+.turbo/
+
+# Environment
 .env
 .env.local
+.env.*.local
+
+# Logs
 *.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test coverage
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Large data (Sefaria dump is ~11GB)
 data/Sefaria-Export/
-.turbo/
+
+# Claude Code local config
+.claude/
