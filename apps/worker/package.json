@@ -13,7 +13,15 @@
     "ingest:chasidut": "tsx ingest-sefaria.ts --category Chasidut",
     "ingest:otzaria": "tsx ingest-otzaria.ts",
     "ingest:otzaria:dry": "tsx ingest-otzaria.ts --dry-run",
-    "ingest:otzaria:kabbalah": "tsx ingest-otzaria.ts --category קבלה"
+    "ingest:otzaria:kabbalah": "tsx ingest-otzaria.ts --category קבלה",
+    "embed": "tsx embed-bulk.ts",
+    "embed:dry": "tsx embed-bulk.ts --dry-run",
+    "embed:test": "tsx embed-bulk.ts --limit 100",
+    "inventory": "tsx corpus-inventory.ts",
+    "inventory:json": "tsx corpus-inventory.ts --json --no-save",
+    "scrape:hebrewbooks": "tsx scrape-hebrewbooks.ts",
+    "scrape:hebrewbooks:dry": "tsx scrape-hebrewbooks.ts --dry-run --limit 20",
+    "scrape:hebrewbooks:subjects": "tsx scrape-hebrewbooks.ts --list-subjects"
   },
   "dependencies": {
     "bullmq": "^5.25.0",

@@ -15,6 +15,13 @@
     "ingest:talmud": "pnpm --filter @halacha-ai/worker ingest:talmud",
     "ingest:chasidut": "pnpm --filter @halacha-ai/worker ingest:chasidut",
     "enqueue": "pnpm --filter @halacha-ai/worker enqueue",
+    "embed": "pnpm --filter @halacha-ai/worker embed",
+    "embed:dry": "pnpm --filter @halacha-ai/worker embed:dry",
+    "embed:test": "pnpm --filter @halacha-ai/worker embed:test",
+    "inventory": "pnpm --filter @halacha-ai/worker inventory",
+    "scrape:hebrewbooks": "pnpm --filter @halacha-ai/worker scrape:hebrewbooks",
+    "scrape:hebrewbooks:dry": "pnpm --filter @halacha-ai/worker scrape:hebrewbooks:dry",
+    "scrape:hebrewbooks:subjects": "pnpm --filter @halacha-ai/worker scrape:hebrewbooks:subjects",
     "check-updates": "tsx scripts/check-updates.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
@@ -24,6 +31,13 @@
   },
   "packageManager": "pnpm@10.30.3",
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "msgpackr-extract", "sharp"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "msgpackr-extract",
+      "sharp"
+    ]
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1"
   }
 }

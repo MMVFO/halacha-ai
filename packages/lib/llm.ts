@@ -264,7 +264,7 @@ export function getLLMInfo() {
     if (configured.perplexity) activeProvider = "perplexity";
     else if (configured.openai) activeProvider = "openai";
     else if (configured.anthropic) activeProvider = "anthropic";
-    else activeProvider = "none";
+    else activeProvider = "anthropic"; // fallback
   }
 
   return {

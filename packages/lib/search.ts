@@ -1,9 +1,10 @@
 import type { CorpusTier, SearchMode, Community } from "@halacha-ai/db";
 import {
   semanticSearch, keywordSearch, getChunksByIds,
-  getChunksByParentRef, getRelationsForChunks,
+  getChunksByParentRef, getRelationsForChunks, expandSynonyms,
 } from "@halacha-ai/db";
 import { embedQuestion } from "./embeddings";
+import { expandQueryVariants, extractKeyTerms } from "./transliteration";
 
 export interface SearchOptions {
   question: string;
@@ -38,13 +39,27 @@ export async function search(options: SearchOptions): Promise<SearchResult> {
     mode = "practical",
   } = options;
 
-  // 1. Embed the question
-  const questionEmbedding = await embedQuestion(question);
+  // 0. Expand query terms for transliteration tolerance
+  const keyTerms = extractKeyTerms(question);
+  const allExpanded: string[] = [];
+  for (const term of keyTerms) {
+    const variants = expandQueryVariants(term);
+    const synonyms = await expandSynonyms(term);
+    allExpanded.push(...variants);
+    for (const syn of synonyms) {
+      allExpanded.push(...expandQueryVariants(syn));
+    }
+  }
+  const expandedTerms = [...new Set(allExpanded)];
 
-  // 2 & 3. Run semantic and keyword searches in parallel
+  // 1. Embed the question (may return empty if no embedding API)
+  const questionEmbedding = await embedQuestion(question);
+  const hasEmbedding = questionEmbedding.length > 0;
+
+  // 2 & 3. Run semantic (if available) and keyword searches in parallel
   const [semResults, kwResults] = await Promise.all([
-    semanticSearch(questionEmbedding, corpusTiers, 60),
-    keywordSearch(question, corpusTiers, 60),
+    hasEmbedding ? semanticSearch(questionEmbedding, corpusTiers, 60) : Promise.resolve([]),
+    keywordSearch(question, corpusTiers, 60, expandedTerms),
   ]);
 
   // 4. Build rank maps

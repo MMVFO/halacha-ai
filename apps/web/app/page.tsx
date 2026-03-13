@@ -86,17 +86,29 @@ export default function Home() {
         For learning and research only — this system does not issue psak halacha.
       </p>
 
-      <Link
-        href="/halacha"
-        className="btn-primary"
-        style={{ textDecoration: "none", fontSize: 16, padding: "14px 36px" }}
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.3-4.3" />
-        </svg>
-        Begin Research
-      </Link>
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
+        <Link
+          href="/halacha"
+          className="btn-primary"
+          style={{ textDecoration: "none", fontSize: 16, padding: "14px 36px" }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          AI Research
+        </Link>
+        <Link
+          href="/reader"
+          className="btn-ghost"
+          style={{ textDecoration: "none", fontSize: 16, padding: "14px 36px" }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          Text Library
+        </Link>
+      </div>
 
       {/* Bottom decorative elements */}
       <div style={{

@@ -127,3 +127,153 @@ export interface InsertAnswer {
   corpus_tiers_used?: string[];
   mode?: SearchMode;
 }
+
+// --- Feature sprint tables ---
+
+export interface TextLink {
+  id: number;
+  source_ref: string;
+  target_ref: string;
+  link_type: string;
+  source_work: string | null;
+  target_work: string | null;
+  created_at: Date;
+}
+
+export interface InsertTextLink {
+  source_ref: string;
+  target_ref: string;
+  link_type?: string;
+  source_work?: string;
+  target_work?: string;
+}
+
+export interface DictionaryEntry {
+  id: number;
+  word: string;
+  word_normalized: string;
+  language: string;
+  definition: string;
+  root: string | null;
+  part_of_speech: string | null;
+  source: string;
+  created_at: Date;
+}
+
+export interface InsertDictionaryEntry {
+  word: string;
+  word_normalized: string;
+  language?: string;
+  definition: string;
+  root?: string;
+  part_of_speech?: string;
+  source?: string;
+}
+
+export interface Topic {
+  id: number;
+  name: string;
+  name_he: string | null;
+  description: string | null;
+  embedding: number[] | null;
+  created_at: Date;
+}
+
+export interface TopicLink {
+  id: number;
+  topic_id: number;
+  chunk_id: number;
+  relevance: number;
+}
+
+export interface Bookmark {
+  id: number;
+  user_id: number;
+  chunk_id: number;
+  label: string | null;
+  color: string;
+  created_at: Date;
+}
+
+export interface Annotation {
+  id: number;
+  user_id: number;
+  chunk_id: number;
+  annotation_type: string;
+  content: string | null;
+  highlight_start: number | null;
+  highlight_end: number | null;
+  color: string;
+  tags: string[];
+  created_at: Date;
+}
+
+export interface ReadingHistoryEntry {
+  id: number;
+  user_id: number;
+  work: string;
+  section_ref: string;
+  time_spent_seconds: number;
+  last_read_at: Date;
+}
+
+export interface StudyProgress {
+  id: number;
+  user_id: number;
+  work: string;
+  total_sections: number;
+  completed_sections: number;
+  last_section_ref: string | null;
+  updated_at: Date;
+}
+
+export interface StudySheet {
+  id: number;
+  user_id: number;
+  title: string;
+  description: string | null;
+  is_public: boolean;
+  share_slug: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface StudySheetItem {
+  id: number;
+  sheet_id: number;
+  chunk_id: number | null;
+  note: string | null;
+  sort_order: number;
+  created_at: Date;
+}
+
+export interface ResearchSession {
+  id: number;
+  user_id: number;
+  title: string | null;
+  context_work: string | null;
+  context_section: string | null;
+  messages: unknown[];
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Rabbi {
+  id: number;
+  name_en: string;
+  name_he: string | null;
+  era: string | null;
+  generation: string | null;
+  community: string;
+  birth_year: string | null;
+  death_year: string | null;
+  location: string | null;
+  bio: string | null;
+  created_at: Date;
+}
+
+export interface RabbiWork {
+  id: number;
+  rabbi_id: number;
+  work_name: string;
+}

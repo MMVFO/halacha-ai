@@ -15,11 +15,11 @@ interface QueryRequest {
 function getTaskType(mode: SearchMode): "practical" | "deep_analysis" | "posek_view" | "general" {
   switch (mode) {
     case "practical":
-      return "practical"; // Perplexity Sonar - web-grounded practical rulings
-    case "deep":
-      return "deep_analysis"; // Claude Sonnet - deep analytical reasoning
-    case "posek":
-      return "posek_view"; // Claude/Perplexity - authoritative perspective
+      return "practical";
+    case "deep_research":
+      return "deep_analysis";
+    case "posek_view":
+      return "posek_view";
     default:
       return "general";
   }
@@ -102,9 +102,9 @@ export async function POST(req: NextRequest) {
       );
     } catch (llmErr: unknown) {
       const msg = llmErr instanceof Error ? llmErr.message : String(llmErr);
-      
+
       // Return sources even when LLM fails (graceful degradation)
-      if (msg.includes("not set") || msg.includes("not configured") || msg.includes("No LLM API key")) {
+      if (msg.includes("not set") || msg.includes("not configured") || msg.includes("No LLM API key") || msg.includes("placeholder") || msg.includes("401") || msg.includes("authentication")) {
         return NextResponse.json({
           answer: `LLM generation failed (no API keys configured). ` +
                   `The search found ${searchResult.sources.length} relevant sources below. ` +
@@ -117,8 +117,8 @@ export async function POST(req: NextRequest) {
           recommended_model: recommendedModel,
         });
       }
-      
-      if (msg.includes("credit") || msg.includes("balance") || msg.includes("insufficient") || msg.includes("All LLM providers failed")) {
+
+      if (msg.includes("credit") || msg.includes("balance") || msg.includes("insufficient") || msg.includes("quota") || msg.includes("rate_limit") || msg.includes("429") || msg.includes("All LLM providers failed")) {
         return NextResponse.json({
           answer: `LLM generation failed (${msg.includes("All LLM providers") ? "all configured providers failed" : "insufficient credits"}). ` +
                   `The search found ${searchResult.sources.length} relevant sources below. ` +
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
           recommended_model: recommendedModel,
         });
       }
-      
+
       // Unknown error - still return sources
       console.error("LLM generation error:", llmErr);
       return NextResponse.json({

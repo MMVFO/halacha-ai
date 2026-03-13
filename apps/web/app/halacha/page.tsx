@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { ExplainButton, ExplainModal } from "../components/ExplainModal";
 
 type SearchMode = "practical" | "deep_research" | "posek_view";
 type CorpusTier = "canonical" | "apocrypha" | "pseudepigrapha" | "academic";
@@ -98,6 +99,7 @@ export default function HalachaPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<QueryResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [explainConcept, setExplainConcept] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -454,6 +456,21 @@ export default function HalachaPage() {
               }}>
                 {result.answer}
               </div>
+              {/* Explain answer button */}
+              <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
+                <button
+                  onClick={() => setExplainConcept(question)}
+                  className="btn-ghost"
+                  style={{ fontSize: 12, padding: "6px 14px", borderRadius: 100 }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  Simplify this answer
+                </button>
+              </div>
             </div>
 
             {/* Sources */}
@@ -555,6 +572,14 @@ export default function HalachaPage() {
                       }}>
                         {s.text.length > 400 ? s.text.slice(0, 400) + "..." : s.text}
                       </div>
+                      <div style={{ marginTop: 10 }}>
+                        <ExplainButton
+                          concept={s.sectionRef}
+                          context="halacha"
+                          sourceWork={s.work}
+                          surroundingText={s.text.slice(0, 300)}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -583,6 +608,16 @@ export default function HalachaPage() {
           </div>
         )}
       </main>
+
+      {/* Explain modal */}
+      {explainConcept && (
+        <ExplainModal
+          concept={explainConcept}
+          initialContext="halacha"
+          onClose={() => setExplainConcept(null)}
+          onNavigate={(concept) => setExplainConcept(concept)}
+        />
+      )}
 
       {/* Spinner keyframe (inline since globals.css might not have it) */}
       <style>{`
